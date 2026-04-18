@@ -3,366 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gia Phả Họ Nguyễn - Website Quản Lý Dòng Họ</title>
+    <title>Gia Phả Họ Nguyễn - Quản Lý Đồng Bộ</title>
     <style>
-        :root {
-            --primary-color: #8b0000;
-            --secondary-color: #f4e4bc;
-            --text-color: #333;
-            --border-color: #d4af37;
-            --btn-hover: #a00000;
-        }
+        :root { --primary: #8b0000; --gold: #d4af37; --bg: #fdfaf1; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        header { text-align: center; border-bottom: 3px double var(--gold); margin-bottom: 30px; padding: 10px; }
+        
+        /* Cấu trúc cây gia phả */
+        .tree-container { overflow-x: auto; background: white; border: 1px solid var(--gold); border-radius: 8px; padding: 40px 20px; min-height: 600px;}
+        .tree ul { display: flex; justify-content: center; position: relative; padding-top: 20px; transition: all 0.5s; padding-left: 0;}
+        .tree li { list-style-type: none; position: relative; padding: 20px 5px 0 5px; text-align: center; }
+        
+        /* Đường kẻ nối */
+        .tree li::before, .tree li::after { content: ''; position: absolute; top: 0; right: 50%; border-top: 2px solid var(--gold); width: 50%; height: 20px; }
+        .tree li::after { right: auto; left: 50%; border-left: 2px solid var(--gold); }
+        .tree li:only-child::after, .tree li:only-child::before { display: none; }
+        .tree li:only-child { padding-top: 0; }
+        .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
+        .tree li:last-child::before { border-right: 2px solid var(--gold); border-radius: 0 5px 0 0; }
+        .tree li:first-child::after { border-radius: 5px 0 0 0; }
+        .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid var(--gold); width: 0; height: 20px; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #fdfaf1;
-            margin: 0;
-            padding: 20px;
-            color: var(--text-color);
-        }
+        /* Thẻ thành viên */
+        .member-card { border: 2px solid var(--gold); padding: 15px 10px; border-radius: 8px; background: #f4e4bc; min-width: 180px; display: inline-block; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .name { font-weight: bold; color: var(--primary); display: block; font-size: 1.1em; margin-bottom: 5px;}
+        .spouse { font-size: 0.85em; color: #555; font-style: italic; display: block; margin-bottom: 5px;}
+        .birth { font-size: 0.8em; color: #666; margin-bottom: 10px; }
+        
+        /* Cụm nút thao tác */
+        .controls { margin-top: 10px; display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+        button { border: none; padding: 6px 10px; border-radius: 4px; font-size: 0.75em; cursor: pointer; color: white; transition: 0.2s; font-weight: bold;}
+        .btn-edit { background: #007bff; }
+        .btn-child { background: #28a745; }
+        .btn-sibling { background: #fd7e14; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
 
-        header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 3px double var(--border-color);
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            color: var(--primary-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 0;
-        }
-
-        .tree-container {
-            overflow-x: auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            min-height: 500px;
-        }
-
-        .tree {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .tree ul {
-            padding-top: 20px; 
-            position: relative;
-            transition: all 0.5s;
-            display: flex;
-            justify-content: center;
-            padding-left: 0;
-        }
-
-        .tree li {
-            text-align: center;
-            list-style-type: none;
-            position: relative;
-            padding: 20px 10px 0 10px;
-            transition: all 0.5s;
-        }
-
-        .tree li::before, .tree li::after{
-            content: '';
-            position: absolute; top: 0; right: 50%;
-            border-top: 2px solid var(--border-color);
-            width: 50%; height: 20px;
-        }
-        .tree li::after{
-            right: auto; left: 50%;
-            border-left: 2px solid var(--border-color);
-        }
-
-        .tree li:only-child::after, .tree li:only-child::before {
-            display: none;
-        }
-
-        .tree li:only-child{ padding-top: 0;}
-        .tree li:first-child::before, .tree li:last-child::after{
-            border: 0 none;
-        }
-        .tree li:last-child::before{
-            border-right: 2px solid var(--border-color);
-            border-radius: 0 5px 0 0;
-        }
-        .tree li:first-child::after{
-            border-radius: 5px 0 0 0;
-        }
-
-        .tree ul ul::before{
-            content: '';
-            position: absolute; top: 0; left: 50%;
-            border-left: 2px solid var(--border-color);
-            width: 0; height: 20px;
-        }
-
-        .member-card {
-            border: 2px solid var(--border-color);
-            padding: 15px 10px;
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            border-radius: 8px;
-            background-color: var(--secondary-color);
-            min-width: 160px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            position: relative;
-            transition: transform 0.2s;
-        }
-
-        .member-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .member-card .name {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .member-card .spouse {
-            font-size: 0.9em;
-            color: #555;
-            font-style: italic;
-            margin-bottom: 5px;
-        }
-
-        .member-card .info {
-            font-size: 0.8em;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .add-branch-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 0.8em;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: auto;
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-        }
-
-        .modal-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .modal-form input, .modal-form select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .submit-btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #statusMsg {
-            text-align: center;
-            font-size: 0.9em;
-            margin-top: 10px;
-            font-weight: bold;
-        }
+        /* Khung Modal (Popup) */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-content h3 { margin-top: 0; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-form { display: flex; flex-direction: column; gap: 12px; }
+        .modal-form input, .modal-form select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em;}
+        .btn-submit { background: var(--primary); padding: 12px; font-weight: bold; font-size: 1em;}
     </style>
 </head>
 <body>
 
 <header>
     <h1>Gia Phả Họ Nguyễn</h1>
-    <p>Gìn giữ cội nguồn - Phát huy truyền thống</p>
+    <p>Hệ Thống Quản Lý Đồng Bộ Thời Gian Thực</p>
 </header>
 
-<div class="container" style="max-width: 1400px; margin: auto;">
-    <div class="tree-container">
-        <div id="familyTree" class="tree">
-            <p id="loadingText" style="font-style: italic; color: #888;">Đang kết nối tới dữ liệu dòng họ...</p>
-        </div>
+<div class="tree-container">
+    <div id="familyTree" class="tree">
+        <p id="loadingMsg" style="font-style: italic; color: #888;">Đang tải dữ liệu từ server...</p>
     </div>
 </div>
 
-<div id="inputModal" class="modal-overlay">
+<div id="memberModal" class="modal">
     <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <h3 id="modalTitle">Thêm thành viên</h3>
-        <form id="addMemberForm" class="modal-form">
-            <input type="hidden" id="parentID" required>
-            <input type="text" id="newName" placeholder="Họ và Tên (*)" required>
-            <select id="newGender">
+        <h3 id="modalTitle">Thông tin thành viên</h3>
+        <form id="memberForm" class="modal-form">
+            <input type="hidden" id="m_id">
+            <input type="hidden" id="m_parentId">
+            
+            <input type="text" id="m_name" placeholder="Họ và Tên (*)" required>
+            <select id="m_gender">
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
             </select>
-            <input type="text" id="newSpouse" placeholder="Họ tên Vợ/Chồng (nếu có)">
-            <input type="text" id="newBirth" placeholder="Ngày/Năm sinh">
-            <button type="submit" class="submit-btn" id="submitBtn">Lưu vào gia phả</button>
+            <input type="text" id="m_spouse" placeholder="Họ tên Vợ/Chồng (nếu có)">
+            <input type="text" id="m_birth" placeholder="Năm sinh">
+            
+            <button type="submit" class="btn-submit" id="submitBtn">LƯU THÔNG TIN</button>
+            <button type="button" onclick="closeModal()" style="background:#666">HỦY</button>
         </form>
-        <div id="statusMsg"></div>
+        <div id="status" style="text-align:center; margin-top:10px; font-size:0.9em; font-weight: bold;"></div>
     </div>
 </div>
 
 <script>
-    // LINK APPS SCRIPT CỦA BẠN ĐÃ ĐƯỢC CHÈN TẠI ĐÂY
+    // Link của bạn đã được tích hợp
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0bWo6KzNPewqS7Bhmt8qW9vmgVRiXP9CrkzvWYa9nmY8byqHf6pTqGv0cTu24Cfz_lQ/exec";
+    let fullData = [];
 
-    const treeContainer = document.getElementById('familyTree');
-    const modal = document.getElementById('inputModal');
-    const form = document.getElementById('addMemberForm');
-    const statusMsg = document.getElementById('statusMsg');
-
-    function renderTree(data) {
-        treeContainer.innerHTML = '';
-        const root = data.find(m => m.parentId == 0 || m.parentId === "");
-        if (!root) {
-            treeContainer.innerHTML = '<p>Dữ liệu trống hoặc lỗi cấu hình Google Sheet.</p>';
-            return;
-        }
-
-        const buildList = (parentId) => {
-            const children = data.filter(m => m.parentId == parentId);
-            if (children.length === 0) return '';
-            let html = '<ul>';
-            children.forEach(child => {
-                html += `<li>
-                    <div class="member-card">
-                        <span class="name">${child.name}</span>
-                        ${child.spouse ? `<span class="spouse">❤️ ${child.spouse}</span>` : ''}
-                        <div class="info">Sinh: ${child.birth || '...'}</div>
-                        <button class="add-branch-btn" onclick="openModal(${child.id}, '${child.name}')">+ Thêm con</button>
-                    </div>
-                    ${buildList(child.id)}
-                </li>`;
-            });
-            html += '</ul>';
-            return html;
-        };
-
-        treeContainer.innerHTML = `<ul>
-            <li>
-                <div class="member-card">
-                    <span class="name">${root.name}</span>
-                    ${root.spouse ? `<span class="spouse">❤️ ${root.spouse}</span>` : ''}
-                    <div class="info">Sinh: ${root.birth || '...'}</div>
-                    <button class="add-branch-btn" onclick="openModal(${root.id}, '${root.name}')">+ Thêm con</button>
-                </div>
-                ${buildList(root.id)}
-            </li>
-        </ul>`;
-    }
-
+    // Tải dữ liệu
     async function loadData() {
         try {
             const response = await fetch(SCRIPT_URL);
-            const data = await response.json();
-            renderTree(data);
-        } catch (e) {
-            console.error(e);
-            document.getElementById('loadingText').innerText = "Lỗi tải dữ liệu. Hãy đảm bảo bạn đã 'Triển khai' Apps Script ở chế độ 'Anyone'.";
+            fullData = await response.json();
+            renderTree(fullData);
+        } catch (e) { 
+            document.getElementById('loadingMsg').innerText = "Lỗi kết nối dữ liệu. Vui lòng thử tải lại trang."; 
         }
     }
 
-    function openModal(parentId, parentName) {
-        document.getElementById('parentID').value = parentId;
-        document.getElementById('modalTitle').innerText = "Thêm con cho: " + parentName;
-        modal.style.display = 'flex';
-        statusMsg.innerText = '';
-        statusMsg.style.color = 'black';
+    // Vẽ sơ đồ cây
+    function renderTree(data) {
+        const container = document.getElementById('familyTree');
+        container.innerHTML = '';
+        
+        // Tìm người gốc
+        const root = data.find(m => m.parentId == 0 || m.parentId === "");
+        if (!root) {
+            container.innerHTML = "<p>Dữ liệu trống hoặc không tìm thấy người khởi tổ.</p>";
+            return;
+        }
+
+        // Đệ quy vẽ nhánh
+        const getChildren = (id) => {
+            const children = data.filter(m => m.parentId == id);
+            if (!children.length) return '';
+            return `<ul>${children.map(c => `<li>${renderCard(c)}${getChildren(c.id)}</li>`).join('')}</ul>`;
+        };
+
+        container.innerHTML = `<ul><li>${renderCard(root)}${getChildren(root.id)}</li></ul>`;
     }
 
-    function closeModal() {
-        modal.style.display = 'none';
-        form.reset();
+    // Tạo HTML cho từng thẻ thành viên
+    function renderCard(m) {
+        return `
+            <div class="member-card">
+                <span class="name">${m.name}</span>
+                <span class="spouse">${m.spouse ? '❤️ '+m.spouse : ''}</span>
+                <div class="birth">Sinh: ${m.birth || '...'}</div>
+                <div class="controls">
+                    <button class="btn-edit" onclick="openEdit(${m.id})">Sửa</button>
+                    <button class="btn-child" onclick="openAdd(${m.id}, 'child', '${m.name}')">+ Con</button>
+                    <button class="btn-sibling" onclick="openAdd(${m.parentId}, 'sibling', '')">+ Chi ngang</button>
+                </div>
+            </div>`;
     }
 
-    window.onclick = function(event) { if (event.target == modal) closeModal(); }
+    // Mở popup để Sửa
+    function openEdit(id) {
+        const m = fullData.find(x => x.id == id);
+        document.getElementById('modalTitle').innerText = "Sửa thông tin: " + m.name;
+        document.getElementById('m_id').value = m.id;
+        document.getElementById('m_parentId').value = m.parentId;
+        document.getElementById('m_name').value = m.name;
+        document.getElementById('m_gender').value = m.gender || 'Nam';
+        document.getElementById('m_spouse').value = m.spouse || '';
+        document.getElementById('m_birth').value = m.birth || '';
+        
+        document.getElementById('status').innerText = "";
+        document.getElementById('memberModal').style.display = 'flex';
+    }
 
-    form.addEventListener('submit', async (e) => {
+    // Mở popup để Thêm (Con hoặc Chi ngang)
+    function openAdd(pId, type, parentName) {
+        document.getElementById('modalTitle').innerText = type === 'child' ? "Thêm con cho: " + parentName : "Thêm chi hàng ngang";
+        document.getElementById('memberForm').reset(); // Xóa trắng form
+        
+        document.getElementById('m_id').value = ""; // Để trống ID để hệ thống biết là THÊM MỚI
+        document.getElementById('m_parentId').value = pId; // Gắn ID người cha/mẹ
+        
+        document.getElementById('status').innerText = "";
+        document.getElementById('memberModal').style.display = 'flex';
+    }
+
+    // Đóng popup
+    function closeModal() { 
+        document.getElementById('memberModal').style.display = 'none'; 
+    }
+
+    // Gửi dữ liệu đi
+    document.getElementById('memberForm').onsubmit = async (e) => {
         e.preventDefault();
         const submitBtn = document.getElementById('submitBtn');
-        submitBtn.innerText = "Đang lưu...";
+        const status = document.getElementById('status');
+        
         submitBtn.disabled = true;
-
-        const newMember = {
-            name: document.getElementById('newName').value,
-            gender: document.getElementById('newGender').value,
-            spouse: document.getElementById('newSpouse').value,
-            parentId: document.getElementById('parentID').value,
-            birth: document.getElementById('newBirth').value
+        submitBtn.innerText = "ĐANG XỬ LÝ...";
+        status.innerText = "Đang đồng bộ với cơ sở dữ liệu...";
+        status.style.color = "#000";
+        
+        const payload = {
+            id: document.getElementById('m_id').value,
+            parentId: document.getElementById('m_parentId').value,
+            name: document.getElementById('m_name').value,
+            gender: document.getElementById('m_gender').value,
+            spouse: document.getElementById('m_spouse').value,
+            birth: document.getElementById('m_birth').value
         };
 
         try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
+            await fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(newMember)
+                body: JSON.stringify(payload) 
             });
             
-            statusMsg.innerText = "Đã gửi yêu cầu! Sơ đồ sẽ cập nhật sau vài giây...";
-            statusMsg.style.color = "green";
+            status.innerText = "Cập nhật thành công! Đang tải lại sơ đồ...";
+            status.style.color = "green";
             
-            setTimeout(() => {
-                closeModal();
-                loadData();
-                submitBtn.innerText = "Lưu vào gia phả";
+            // Đợi 2.5 giây để Google Sheet lưu xong rồi tải lại
+            setTimeout(() => { 
+                closeModal(); 
+                loadData(); 
                 submitBtn.disabled = false;
-            }, 3000);
-
-        } catch (e) {
-            statusMsg.innerText = "Lỗi gửi dữ liệu!";
-            statusMsg.style.color = "red";
+                submitBtn.innerText = "LƯU THÔNG TIN";
+            }, 2500);
+            
+        } catch (e) { 
+            status.innerText = "Có lỗi xảy ra, vui lòng thử lại!"; 
+            status.style.color = "red";
             submitBtn.disabled = false;
+            submitBtn.innerText = "LƯU THÔNG TIN";
         }
-    });
+    };
 
+    // Chạy tải dữ liệu khi vừa mở web
     loadData();
 </script>
 </body>
