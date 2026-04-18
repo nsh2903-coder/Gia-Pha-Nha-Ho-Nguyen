@@ -1,47 +1,327 @@
-function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = sheet.getDataRange().getValues();
-  var result = [];
-  
-  // Bỏ qua dòng tiêu đề
-  for (var i = 1; i < data.length; i++) {
-    var row = data[i];
-    if(row[0] !== "") {
-      result.push({
-        id: row[0],
-        name: row[1],
-        gender: row[2],
-        spouse: row[3],
-        parentId: row[4],
-        birth: row[6]
-      });
-    }
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
-}
 
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  
-  // Tự động tạo ID mới
-  var lastRow = sheet.getLastRow();
-  var newId = lastRow; 
-  
-  // Thêm dữ liệu vào dòng cuối cùng
-  sheet.appendRow([
-    newId, 
-    data.name, 
-    data.gender, 
-    data.spouse, 
-    data.parentId, 
-    "", // Đời thứ có thể bổ sung logic sau
-    data.birth, 
-    "", 
-    ""
-  ]);
-  
-  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
-}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gia Phả Họ Nguyễn - Website Quản Lý Dòng Họ</title>
+    <style>
+        :root {
+            --primary-color: #8b0000;
+            --secondary-color: #f4e4bc;
+            --text-color: #333;
+            --border-color: #d4af37;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fdfaf1;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 3px double var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* Form styling */
+        .form-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #a00000;
+        }
+
+        /* Tree styling */
+        .tree-container {
+            overflow-x: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree ul {
+            padding-top: 20px; 
+            position: relative;
+            transition: all 0.5s;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tree li {
+            float: left; 
+            text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 20px 5px 0 5px;
+            transition: all 0.5s;
+        }
+
+        /* Connectors */
+        .tree li::before, .tree li::after{
+            content: '';
+            position: absolute; top: 0; right: 50%;
+            border-top: 2px solid var(--border-color);
+            width: 50%; height: 20px;
+        }
+        .tree li::after{
+            right: auto; left: 50%;
+            border-left: 2px solid var(--border-color);
+        }
+
+        .tree li:only-child::after, .tree li:only-child::before {
+            display: none;
+        }
+
+        .tree li:only-child{ padding-top: 0;}
+        .tree li:first-child::before, .tree li:last-child::after{
+            border: 0 none;
+        }
+        .tree li:last-child::before{
+            border-right: 2px solid var(--border-color);
+            border-radius: 0 5px 0 0;
+        }
+        .tree li:first-child::after{
+            border-radius: 5px 0 0 0;
+        }
+
+        .tree ul ul::before{
+            content: '';
+            position: absolute; top: 0; left: 50%;
+            border-left: 2px solid var(--border-color);
+            width: 0; height: 20px;
+        }
+
+        /* Member Card */
+        .member-card {
+            border: 2px solid var(--border-color);
+            padding: 10px;
+            display: inline-block;
+            border-radius: 5px;
+            background-color: var(--secondary-color);
+            min-width: 150px;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .member-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .member-card .name {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .member-card .spouse {
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .member-card .info {
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .loading {
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Gia Phả Họ Nguyễn</h1>
+    <p>Gìn giữ cội nguồn - Phát huy truyền thống</p>
+</header>
+
+<div class="container">
+    <div class="form-section">
+        <h3>Thêm Thành Viên Mới</h3>
+        <form id="addMemberForm" class="form-grid">
+            <input type="text" id="newName" placeholder="Họ và Tên" required>
+            <select id="newGender">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+            <input type="text" id="newSpouse" placeholder="Vợ/Chồng">
+            <input type="number" id="parentID" placeholder="ID Cha/Mẹ (0 nếu là tổ)" required>
+            <input type="text" id="newBirth" placeholder="Ngày sinh">
+            <button type="submit">Cập Nhật Vào Gia Phả</button>
+        </form>
+        <p id="statusMsg" style="margin-top:10px; font-size: 0.9em;"></p>
+    </div>
+
+    <div class="tree-container">
+        <div id="familyTree" class="tree">
+            <p class="loading">Đang tải dữ liệu...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DÁN ĐƯỜNG LINK GOOGLE APPS SCRIPT VÀO ĐÂY SAU KHI TRIỂN KHAI
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+    const form = document.getElementById('addMemberForm');
+    const treeContainer = document.getElementById('familyTree');
+    const statusMsg = document.getElementById('statusMsg');
+
+    // Dữ liệu mẫu ban đầu để hiển thị khi chưa cài đặt Apps Script
+    let familyData = [
+        {id: 1, name: "Nguyễn Văn A", gender: "Nam", spouse: "Trần Thị B", parentId: 0, birth: "1920"},
+        {id: 2, name: "Nguyễn Thị C", gender: "Nữ", spouse: "Lê Văn D", parentId: 1, birth: "1950"},
+        {id: 3, name: "Nguyễn Văn E", gender: "Nam", spouse: "Phạm Thị F", parentId: 1, birth: "1955"},
+        {id: 4, name: "Nguyễn Văn G", gender: "Nam", spouse: "", parentId: 3, birth: "1985"}
+    ];
+
+    function renderTree(data) {
+        treeContainer.innerHTML = '';
+        const root = data.find(m => m.parentId == 0);
+        if (!root) {
+            treeContainer.innerHTML = 'Không tìm thấy ông tổ.';
+            return;
+        }
+
+        const buildList = (parentId) => {
+            const children = data.filter(m => m.parentId == parentId);
+            if (children.length === 0) return '';
+
+            let html = '<ul>';
+            children.forEach(child => {
+                html += `<li>
+                    <div class="member-card">
+                        <span class="name">${child.name}</span>
+                        ${child.spouse ? `<span class="spouse">❤️ ${child.spouse}</span>` : ''}
+                        <div class="info">ID: ${child.id} | Sinh: ${child.birth || 'N/A'}</div>
+                    </div>
+                    ${buildList(child.id)}
+                </li>`;
+            });
+            html += '</ul>';
+            return html;
+        };
+
+        treeContainer.innerHTML = `<ul>
+            <li>
+                <div class="member-card">
+                    <span class="name">${root.name}</span>
+                    <span class="spouse">❤️ ${root.spouse}</span>
+                    <div class="info">ID: ${root.id} | Sinh: ${root.birth}</div>
+                </div>
+                ${buildList(root.id)}
+            </li>
+        </ul>`;
+    }
+
+    async function loadData() {
+        if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
+            renderTree(familyData);
+            return;
+        }
+
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            renderTree(data);
+        } catch (e) {
+            console.error(e);
+            statusMsg.innerText = "Lỗi khi tải dữ liệu từ Google Sheet.";
+        }
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const newMember = {
+            name: document.getElementById('newName').value,
+            gender: document.getElementById('newGender').value,
+            spouse: document.getElementById('newSpouse').value,
+            parentId: document.getElementById('parentID').value,
+            birth: document.getElementById('newBirth').value
+        };
+
+        statusMsg.innerText = "Đang đồng bộ dữ liệu...";
+
+        if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
+            newMember.id = familyData.length + 1;
+            familyData.push(newMember);
+            renderTree(familyData);
+            statusMsg.innerText = "Đã cập nhật giao diện (Cần cấu hình Apps Script để lưu vào Sheet).";
+            form.reset();
+            return;
+        }
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(newMember)
+            });
+            statusMsg.innerText = "Đã gửi dữ liệu thành công!";
+            form.reset();
+            setTimeout(loadData, 2000); // Reload data after 2 seconds
+        } catch (e) {
+            statusMsg.innerText = "Lỗi khi gửi dữ liệu.";
+        }
+    });
+
+    loadData();
+</script>
+</body>
+</html>
