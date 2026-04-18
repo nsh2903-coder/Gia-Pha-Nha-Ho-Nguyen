@@ -283,7 +283,7 @@
 
 <script>
     // BẠN VẪN GIỮ NGUYÊN LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY NHÉ
-    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0bWo6KzNPewqS7Bhmt8qW9vmgVRiXP9CrkzvWYa9nmY8byqHf6pTqGv0cTu24Cfz_lQ/exec";
 
     const treeContainer = document.getElementById('familyTree');
     const modal = document.getElementById('inputModal');
@@ -338,7 +338,7 @@
 
     // Tải dữ liệu từ Sheet
     async function loadData() {
-        if (SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycby0bWo6KzNPewqS7Bhmt8qW9vmgVRiXP9CrkzvWYa9nmY8byqHf6pTqGv0cTu24Cfz_lQ/exec")) {
+        if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
             treeContainer.innerHTML = "<p>Vui lòng cập nhật đường link Apps Script vào mã nguồn.</p>";
             return;
         }
