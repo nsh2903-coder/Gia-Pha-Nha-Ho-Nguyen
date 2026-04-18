@@ -1,0 +1,47 @@
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var result = [];
+  
+  // Bỏ qua dòng tiêu đề
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    if(row[0] !== "") {
+      result.push({
+        id: row[0],
+        name: row[1],
+        gender: row[2],
+        spouse: row[3],
+        parentId: row[4],
+        birth: row[6]
+      });
+    }
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  // Tự động tạo ID mới
+  var lastRow = sheet.getLastRow();
+  var newId = lastRow; 
+  
+  // Thêm dữ liệu vào dòng cuối cùng
+  sheet.appendRow([
+    newId, 
+    data.name, 
+    data.gender, 
+    data.spouse, 
+    data.parentId, 
+    "", // Đời thứ có thể bổ sung logic sau
+    data.birth, 
+    "", 
+    ""
+  ]);
+  
+  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
+}
