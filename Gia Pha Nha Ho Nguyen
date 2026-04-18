@@ -215,7 +215,7 @@
 
 <script>
     // DÁN ĐƯỜNG LINK GOOGLE APPS SCRIPT VÀO ĐÂY SAU KHI TRIỂN KHAI
-    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0bWo6KzNPewqS7Bhmt8qW9vmgVRiXP9CrkzvWYa9nmY8byqHf6pTqGv0cTu24Cfz_lQ/exec";
 
     const form = document.getElementById('addMemberForm');
     const treeContainer = document.getElementById('familyTree');
